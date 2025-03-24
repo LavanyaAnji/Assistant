@@ -1,82 +1,157 @@
-import React from 'react';
-import { PillIcon, Search, AlertCircle } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medications by Patient</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
 
-const medications = [
-  {
-    patient: 'John Smith',
-    medications: [
-      { name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', notes: 'Take in the morning' },
-      { name: 'Metoprolol', dosage: '25mg', frequency: 'Twice daily', notes: 'Take with food' }
-    ]
-  },
-  {
-    patient: 'Sarah Johnson',
-    medications: [
-      { name: 'Metformin', dosage: '500mg', frequency: 'Twice daily', notes: 'Take with meals' },
-      { name: 'Glipizide', dosage: '5mg', frequency: 'Once daily', notes: 'Take before breakfast' }
-    ]
-  },
-  {
-    patient: 'Mike Brown',
-    medications: [
-      { name: 'Albuterol', dosage: '90mcg', frequency: 'As needed', notes: 'Use inhaler for breathing difficulties' },
-      { name: 'Fluticasone', dosage: '110mcg', frequency: 'Twice daily', notes: 'Use inhaler morning and night' }
-    ]
+    header {
+      background: #007BFF;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      font-size: 28px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      width: 100%;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 15px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background: #007BFF;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+<header>Medications by Patient</header>
+
+<div class="container">
+  <h2>Select Patient</h2>
+
+  <select id="patient-select" onchange="loadMedications()">
+    <option value="">Select a Patient</option>
+    <!-- Patient options will be dynamically loaded -->
+  </select>
+
+  <h2>Medications</h2>
+  <table id="medications-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Dosage</th>
+        <th>Frequency</th>
+        <th>Prescribed By</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  // ✅ Dataset URL (replace with your hosted Kaggle dataset URL)
+  const DATASET_URL = "https://www.kaggle.com/datasets/prasad22/healthcare-dataset";
+
+  // ✅ Load patients and populate dropdown
+  async function loadPatients() {
+    try {
+      const res = await fetch(DATASET_URL);
+      const patients = await res.json();
+
+      const select = document.getElementById('patient-select');
+
+      // Populate patient dropdown
+      patients.forEach((patient, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = ${patient.patient_id} - ${patient.gender}, ${patient.age} yrs;
+        select.appendChild(option);
+      });
+
+    } catch (error) {
+      console.error("Error loading patients:", error);
+    }
   }
-];
 
-function Medications() {
-  return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Medications</h2>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search medications..."
-            className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-        </div>
-      </div>
+  // ✅ Load medications for the selected patient
+  async function loadMedications() {
+    const selectedIndex = document.getElementById('patient-select').value;
 
-      <div className="space-y-6">
-        {medications.map((record, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                  <PillIcon className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">{record.patient}</h3>
-              </div>
-            </div>
+    if (selectedIndex === "") return;
 
-            <div className="space-y-4">
-              {record.medications.map((medication, medIndex) => (
-                <div key={medIndex} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-gray-800">{medication.name}</span>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                      {medication.dosage}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {medication.frequency}
-                  </div>
-                  <div className="flex items-start text-sm text-gray-600">
-                    <AlertCircle className="w-4 h-4 mr-2 mt-0.5" />
-                    {medication.notes}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+    try {
+      const res = await fetch(DATASET_URL);
+      const patients = await res.json();
+      const patient = patients[selectedIndex];
 
-export default Medications;
+      const table = document.querySelector('#medications-table tbody');
+      table.innerHTML = '';
+
+      if (patient.medications && patient.medications.length > 0) {
+        patient.medications.forEach(med => {
+          const row = `
+            <tr>
+              <td>${med.name}</td>
+              <td>${med.dosage}</td>
+              <td>${med.frequency}</td>
+              <td>${med.prescribedBy}</td>
+            </tr>
+          `;
+          table.innerHTML += row;
+        });
+      } else {
+        table.innerHTML = '<tr><td colspan="4">No medications found</td></tr>';
+      }
+
+    } catch (error) {
+      console.error("Error loading medications:", error);
+    }
+  }
+
+  // ✅ Load patients on page load
+  window.onload = loadPatients;
+</script>
+
+</body>
+</html>
